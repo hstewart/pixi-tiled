@@ -17,7 +17,7 @@
     "build": "browserify index.js -o bin/pixi-tiled.js"
   },
   "peerDependencies": {
-    "pixi.js": "^3.0.2"
+    "pixi.js": "^4.5.3"
   },
   "devDependencies": {
     "browserify": "~9.0.8",
