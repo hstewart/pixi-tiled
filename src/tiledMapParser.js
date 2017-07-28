@@ -198,6 +198,25 @@ module.exports = function() {
                     break;
                 case 'objectlayer':
                     return util.warn('pixi-tiled: object layers currently unsupported');
+                case 'objectgroup':
+                    window.xxobjectgrouplayer = layer;
+                    console.log(layer);
+                    gids = [];
+                    for (var ii = 0; ii < layerData.objects.length; ii++) {
+                        var o = layerData.objects[ii];
+                        console.log("object", ii, o.gid, o);
+                        tilesetAndTexture = findTilesetAndTexture(o.gid, map.tilesets);
+                        texture = tilesetAndTexture.texture;
+
+                        tile = new Tile(o.gid, texture);
+
+                        tile.x = o.x; //computeXCoordinate(x, y, data.tilewidth, data.orientation, data.staggerindex);
+                        tile.y = o.y;//computeYCoordinate(y, data.tileheight, tilesetAndTexture.tileset.imageHeight, data.orientation);
+
+                        layer.addChild(tile);
+                    }
+                    break;
+
                 case 'tilelayer':
 
                     if(layerData.compression) {
@@ -241,6 +260,10 @@ module.exports = function() {
 							  }
 						 }
 					}
+
+                    break;
+                default:
+                    console.error("unhandled layer type",layerData.type);
 				}
 
             // add to map
