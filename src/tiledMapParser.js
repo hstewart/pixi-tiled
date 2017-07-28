@@ -103,22 +103,24 @@ module.exports = function() {
 
             toLoad++;
 
-            var src = path.join(root, tilesetData.image);
+            if ( typeof tilesetData.image !== "undefined") {
+                var src = path.join(root, tilesetData.image);
 
-            var baseTexture = PIXI.BaseTexture.fromImage(src);
+                var baseTexture = PIXI.BaseTexture.fromImage(src);
 
-            var tileset = new Tileset(tilesetData, baseTexture);
+                var tileset = new Tileset(tilesetData, baseTexture);
 
-            // update the textures once the base texture has loaded
-            baseTexture.once('loaded', function () {
-                toLoad--;
-                tileset.updateTextures();
-                if (toLoad <= 0) {
-                    next();
-                }
-            });
+                // update the textures once the base texture has loaded
+                baseTexture.once('loaded', function () {
+                    toLoad--;
+                    tileset.updateTextures();
+                    if (toLoad <= 0) {
+                        next();
+                    }
+                });
 
-            map.tilesets.push(tileset);
+                map.tilesets.push(tileset);
+            }
 
             var id, i, p, tile, shapeData, shapes, shape, points;
 
@@ -126,34 +128,55 @@ module.exports = function() {
 
                 tile = tilesetData.tiles[id];
 
-                for(i = 0; i < tile.objectgroup.objects.length; i++) {
+                if ( typeof tile.image !== "undefined") {
+                    var src = path.join(root, tile.image);
 
-                    shapeData = tile.objectgroup.objects[0];
+                    var baseTexture = PIXI.BaseTexture.fromImage(src);
 
-                    shapes = [];
+                    var tileset = new Tileset(tilesetData, baseTexture);
 
-                    if (shapeData.polygon) {
+                    // update the textures once the base texture has loaded
+                    baseTexture.once('loaded', function () {
+                        toLoad--;
+                        tileset.updateTextures();
+                        if (toLoad <= 0) {
+                            next();
+                        }
+                    });
 
-                        points = [];
+                    map.tilesets.push(tileset);
+                }
 
-                        for (p = 0; p < shapeData.polygon.length; p++) {
-                            points.push(shapeData.polygon[p].x + shapeData.x);
-                            points.push(shapeData.polygon[p].y + shapeData.y);
+                if ( typeof tile.objectgroup !== "undefined") {
+                    for(i = 0; i < tile.objectgroup.objects.length; i++) {
+
+                        shapeData = tile.objectgroup.objects[0];
+
+                        shapes = [];
+
+                        if (shapeData.polygon) {
+
+                            points = [];
+
+                            for (p = 0; p < shapeData.polygon.length; p++) {
+                                points.push(shapeData.polygon[p].x + shapeData.x);
+                                points.push(shapeData.polygon[p].y + shapeData.y);
+                            }
+
+                            shape = new PIXI.Polygon(points);
+
+                        } else if (shapeData.ellipse) {
+
+                            shape = new PIXI.Circle(shapeData.x, shapeData.y, shapeData.height / 2);
+
+                        } else {
+
+                            shape = new PIXI.Rectangle(shapeData.x, shapeData.y, shapeData.width, shapeData.height);
+
                         }
 
-                        shape = new PIXI.Polygon(points);
-
-                    } else if (shapeData.ellipse) {
-
-                        shape = new PIXI.Circle(shapeData.x, shapeData.y, shapeData.height / 2);
-
-                    } else {
-
-                        shape = new PIXI.Rectangle(shapeData.x, shapeData.y, shapeData.width, shapeData.height);
-
+                        shapes.push(shape);
                     }
-
-                    shapes.push(shape);
                 }
 
                 // object data id is 1 lower than gid for some reason
