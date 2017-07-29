@@ -45,7 +45,7 @@ module.exports = function() {
 				if ( 'odd' === staggerindex ){
 
 					x += (j % 2 != 0) ? tilewidth / 2 : 0;
-					
+
 				} else {
 
 					x += (j % 2 == 0) ? tilewidth / 2 : 0;
@@ -98,6 +98,8 @@ module.exports = function() {
         var map = new TiledMap(data);
 
         var toLoad = 0;
+
+        var tilesetAndTexture;
 
         data.tilesets.forEach(function (tilesetData) {
 
