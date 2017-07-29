@@ -11,8 +11,8 @@ var Tileset = function (data, texture) {
 
     this.name = data.name;
     this.firstGID = data.firstgid;
-    this.imageHeight = data.imageheight;
-    this.imageWidth = data.imagewidth;
+    this.imageHeight = data.imageheight ? data.imageheight : data.tileheight;
+    this.imageWidth = data.imagewidth ? data.imagewidth : data.tilewidth;
     this.tileHeight = data.tileheight;
     this.tileWidth = data.tilewidth;
     this.margin = data.margin;
