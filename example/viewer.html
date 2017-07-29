@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.4/pixi.js'></script>
+  <script src='https://unpkg.com/impetus@0.8.7/dist/impetus.min.js'></script>
+  <title></title>
+  <style>
+  canvas {
+  	position: fixed;
+  	top:0;
+  	bottom:0;
+  	left:0;
+  	right:0;
+  	width:100%;
+  	height:100%;
+  }
+  </style>
+</head>
+<body>
+
+
+<script>
+
+//var PIXI = require('pixi.js');
+//var pixiTiled = require('pixi-tiled');
+
+/**
+ * Simply load a Tiled map in json format
+ * The map data will be loaded, parsed and a renderable Map object made available on res.tiledMap
+ */
+
+var app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
+document.body.appendChild(app.view);
+
+PIXI.loader.add('example/level1.json', function(res)
+{
+    var map = res.tiledMap;
+    app.stage.addChild( map );
+    window.xmap = map;
+    init_impetus();
+});
+
+PIXI.loader.load();
+
+var impetus = new Impetus({
+    source: document.getElementsByTagName("canvas")[0],
+    //initialValues:[0,100],
+    boundY:[-2000,0],
+    update: function(x, y) {
+    	update(x,y);
+        // whatever you want to do with the values
+    }
+});
+
+
+function update(x,y){
+	//console.log("impetus", x, y);
+	app.stage.children[0].position.y = y;
+	app.stage.children[0].position.x = x;
+}
+
+function init_impetus(){
+	resizefit();
+	scroll_and_recenter()
+}
+
+function scroll_and_recenter(){
+	var yscroll = app.view.height - app.stage.children[0].height;
+	var xscroll = app.view.width- app.stage.children[0].width;
+	impetus.setValues(xscroll/2, yscroll);
+	update(xscroll/2, yscroll);
+	impetus.setBoundY([yscroll,0]);
+	impetus.setBoundX([xscroll,0]);
+}
+///init_impetus();
+
+//--- dynamically resize the stage on resize
+function resizefit(){
+	var rect = app.view.getBoundingClientRect();
+	app.renderer.resize(rect.width, rect.height);
+	app.view.width = rect.width;
+	app.view.height = rect.height;
+
+	try{
+		scroll_and_recenter();
+	//recenter();
+	}catch(e){
+
+	}
+}
+
+var throttle = function(type, name, obj) {
+    obj = obj || window;
+    var running = false;
+    var func = function() {
+        if (running) { return; }
+        running = true;
+         requestAnimationFrame(function() {
+            obj.dispatchEvent(new CustomEvent(name));
+            running = false;
+        });
+    };
+    obj.addEventListener(type, func);
+};
+
+/* init - you can init any event */
+throttle("resize", "optimizedResize");
+
+// handle event
+window.addEventListener("optimizedResize", function() {
+    //console.log("Resource conscious resize callback!");
+    resizefit();
+});
+//---------------------------------------------------------------
+
+
+
+</script>
+</body>
+</html>

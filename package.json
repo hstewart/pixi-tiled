@@ -14,14 +14,24 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "build": "browserify index.js -o bin/pixi-tiled.js"
+    "build": "browserify index.js -o bin/pixi-tiled.js",
+    "build-webpack": "node_modules/.bin/webpack --progress --colors --config webpack.config.prod.js",
+    "dev": "node_modules/.bin/webpack-dev-server --progress --colors",
+    "patch-webpack-dev-server-issue-955": "sed -i 's/const bonjour = require(\"bonjour\")();/const bonjour = {};/' node_modules/webpack-dev-server/bin/webpack-dev-server.js"
   },
   "peerDependencies": {
     "pixi.js": "^4.5.3"
   },
   "devDependencies": {
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.1.1",
+    "babel-preset-es2015": "^6.24.1",
     "browserify": "~9.0.8",
     "chai": "^2.3.0",
-    "mocha": "^2.2.4"
+    "html-webpack-plugin": "^2.29.0",
+    "mocha": "^2.2.4",
+    "webpack": "^3.1.0",
+    "webpack-dev-server": "^2.5.1"
+
   }
 }
