@@ -5,6 +5,8 @@ var Tile = require('./Tile');
 var path = require('path');
 var util = require('./util');
 
+
+
 module.exports = function() {
 
     /**
@@ -92,89 +94,62 @@ module.exports = function() {
 
         // tileset image paths are relative so we need the root path
         var root = path.dirname(resource.url);
-
         var data = resource.data;
-
         var map = new TiledMap(data);
-
         var toLoad = 0;
-
         var tilesetAndTexture;
 
-        data.tilesets.forEach(function (tilesetData) {
+        function addTilesetDataToMap(tilesetData, tile){
+            var tileset;
+            var src = "";
+            if ( tile && typeof tile.image !== "undefined") {
+                src = path.join(root, tile.image);
+            } else if ( typeof tilesetData.image !== "undefined") {
+                src = path.join(root, tilesetData.image);
+            } else {
+                return;
+            }
+            var baseTexture = PIXI.BaseTexture.fromImage(src);
+            var tileset = new Tileset(tilesetData, baseTexture);
+            // update the textures once the base texture has loaded
+            baseTexture.once('loaded', function () {
+                toLoad--;
+                tileset.updateTextures();
+                if (toLoad <= 0) {
+                    next();
+                }
+            });
 
+            map.tilesets.push(tileset);
+            return tileset;
+         }
+
+        data.tilesets.forEach(function (tilesetData) {
+            var id, i, p, tile, shapeData, shapes, shape, points;
             toLoad++;
 
-            if ( typeof tilesetData.image !== "undefined") {
-                var src = path.join(root, tilesetData.image);
-
-                var baseTexture = PIXI.BaseTexture.fromImage(src);
-
-                var tileset = new Tileset(tilesetData, baseTexture);
-
-                // update the textures once the base texture has loaded
-                baseTexture.once('loaded', function () {
-                    toLoad--;
-                    tileset.updateTextures();
-                    if (toLoad <= 0) {
-                        next();
-                    }
-                });
-
-                map.tilesets.push(tileset);
-            }
-
-            var id, i, p, tile, shapeData, shapes, shape, points;
+            var tileset = addTilesetDataToMap( tilesetData, false);
 
             for(id in tilesetData.tiles) {
-
                 tile = tilesetData.tiles[id];
-
-                if ( typeof tile.image !== "undefined") {
-                    var src = path.join(root, tile.image);
-
-                    var baseTexture = PIXI.BaseTexture.fromImage(src);
-
-                    var tileset = new Tileset(tilesetData, baseTexture);
-
-                    // update the textures once the base texture has loaded
-                    baseTexture.once('loaded', function () {
-                        toLoad--;
-                        tileset.updateTextures();
-                        if (toLoad <= 0) {
-                            next();
-                        }
-                    });
-
-                    map.tilesets.push(tileset);
-                }
+                tileset = addTilesetDataToMap( tilesetData, tile );
 
                 if ( typeof tile.objectgroup !== "undefined") {
                     for(i = 0; i < tile.objectgroup.objects.length; i++) {
-
                         shapeData = tile.objectgroup.objects[0];
-
                         shapes = [];
 
                         if (shapeData.polygon) {
-
                             points = [];
-
                             for (p = 0; p < shapeData.polygon.length; p++) {
                                 points.push(shapeData.polygon[p].x + shapeData.x);
                                 points.push(shapeData.polygon[p].y + shapeData.y);
                             }
-
                             shape = new PIXI.Polygon(points);
-
                         } else if (shapeData.ellipse) {
-
                             shape = new PIXI.Circle(shapeData.x, shapeData.y, shapeData.height / 2);
-
                         } else {
-
                             shape = new PIXI.Rectangle(shapeData.x, shapeData.y, shapeData.width, shapeData.height);
-
                         }
 
                         shapes.push(shape);
@@ -189,11 +164,9 @@ module.exports = function() {
         });
 
         data.layers.forEach(function (layerData) {
-
             var layer = new Layer(layerData.name, layerData.opacity);
 
             switch(layerData.type) {
-
                 case 'imagelayer':
                     var mapTexture = PIXI.Sprite.fromImage(layerData.image);
                     layer.addChild(mapTexture);
@@ -201,12 +174,9 @@ module.exports = function() {
                 case 'objectlayer':
                     return util.warn('pixi-tiled: object layers currently unsupported');
                 case 'objectgroup':
-                    window.xxobjectgrouplayer = layer;
-                    console.log(layer);
                     gids = [];
                     for (var ii = 0; ii < layerData.objects.length; ii++) {
                         var o = layerData.objects[ii];
-                        console.log("object", ii, o.gid, o);
                         tilesetAndTexture = findTilesetAndTexture(o.gid, map.tilesets);
                         texture = tilesetAndTexture.texture;
 
@@ -220,7 +190,6 @@ module.exports = function() {
                     break;
 
                 case 'tilelayer':
-
                     if(layerData.compression) {
                         return util.warn('pixi-tiled: compressed layer data currently unsupported');
                     }
