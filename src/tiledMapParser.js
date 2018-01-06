@@ -26,7 +26,7 @@ module.exports = function() {
         // calculate the internal position within the tileset
         ix = gid - tileset.firstGID;
 
-		  return {"tileset": tileset, "texture":tileset.textures[ix]};
+		return {"tileset": tileset, "texture":tileset.textures[ix]};
     }
 
 	 /**
@@ -99,7 +99,7 @@ module.exports = function() {
         var toLoad = 0;
         var tilesetAndTexture;
 
-        function addTilesetDataToMap(tilesetData, tile){
+        function addTilesetDataToMap(tilesetData, tile, tileid){
             var tileset;
             var src = "";
             if ( tile && typeof tile.image !== "undefined") {
@@ -111,6 +111,12 @@ module.exports = function() {
             }
             var baseTexture = PIXI.BaseTexture.fromImage(src);
             var tileset = new Tileset(tilesetData, baseTexture);
+
+            // tiles with individual image files need to be treated as tilesets so that the assets are loaded. each tileset needs a unique firstgid
+            if ( tile && tileid ) {
+                tileset.firstGID = parseInt(tileset.firstGID) + parseInt(tileid);
+            }
+
             // update the textures once the base texture has loaded
             baseTexture.once('loaded', function () {
                 toLoad--;
@@ -132,7 +138,7 @@ module.exports = function() {
 
             for(id in tilesetData.tiles) {
                 tile = tilesetData.tiles[id];
-                tileset = addTilesetDataToMap( tilesetData, tile );
+                tileset = addTilesetDataToMap( tilesetData, tile, id );
 
                 if ( typeof tile.objectgroup !== "undefined") {
                     for(i = 0; i < tile.objectgroup.objects.length; i++) {

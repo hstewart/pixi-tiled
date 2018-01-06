@@ -47,7 +47,6 @@ var Tileset = function (data, texture) {
  * update the frames of the textures
  */
 Tileset.prototype.updateTextures = function () {
-
     var texture, frame, x, y, i = 0;
 
     for (y = this.margin; y < this.imageHeight; y += this.tileHeight + this.spacing) {
