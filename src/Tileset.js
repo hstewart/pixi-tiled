@@ -4,9 +4,11 @@ var util = require('./util');
  * Tileset
  * @constructor
  */
-var Tileset = function (data, texture) {
+var Tileset = function (data, texture, existingtexture) {
 
     this.baseTexture = texture;
+    this.existingTexture = existingtexture;
+
     this.textures = [];
 
     this.name = data.name;
@@ -17,6 +19,18 @@ var Tileset = function (data, texture) {
     this.tileWidth = data.tilewidth;
     this.margin = data.margin;
     this.spacing = data.spacing;
+
+    if ( this.existingTexture) {
+        this.imageHeight = this.baseTexture.height;
+        this.imageWidth = this.baseTexture.width;
+        this.tileHeight = this.existingTexture.trim.height;
+        this.tileWidth = this.existingTexture.trim.width;
+        this.margin = 0;
+        this.spacing = 0;
+        this.textures.push( new PIXI.Texture(this.baseTexture) );
+        this.tiles = {};
+        return;
+    }
     // @todo data.properties?
 
     var x, y;
@@ -48,6 +62,14 @@ var Tileset = function (data, texture) {
  */
 Tileset.prototype.updateTextures = function () {
     var texture, frame, x, y, i = 0;
+
+    if ( this.existingTexture ) {
+        this.textures[0].frame = this.existingTexture.frame;
+        this.textures[0].trim = this.existingTexture.trim;
+        // flip the y because the Tile.js anchors textures in bottom right???
+        this.textures[0].trim.y = -this.textures[0].trim.y;
+        return;
+    }
 
     for (y = this.margin; y < this.imageHeight; y += this.tileHeight + this.spacing) {
 

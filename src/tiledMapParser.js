@@ -102,6 +102,8 @@ module.exports = function() {
         function addTilesetDataToMap(tilesetData, tile, tileid){
             var tileset;
             var src = "";
+            var useCache = false;
+
             if ( tile && typeof tile.image !== "undefined") {
                 src = path.join(root, tile.image);
             } else if ( typeof tilesetData.image !== "undefined") {
@@ -109,24 +111,41 @@ module.exports = function() {
             } else {
                 return;
             }
-            var baseTexture = PIXI.BaseTexture.fromImage(src);
-            var tileset = new Tileset(tilesetData, baseTexture);
+
+
+            var baseTexture;
+            var existingTexture;
+
+            if ( PIXI && PIXI.utils.TextureCache && typeof PIXI.utils.TextureCache[tile.image] != "undefined") {
+                existingTexture = PIXI.utils.TextureCache[tile.image];
+                baseTexture = PIXI.BaseTexture.fromImage( existingTexture.baseTexture.imageUrl );
+                useCache = true;
+            } else {
+                baseTexture = PIXI.BaseTexture.fromImage(src);
+            }
+
+            var tileset = new Tileset(tilesetData, baseTexture, existingTexture);
 
             // tiles with individual image files need to be treated as tilesets so that the assets are loaded. each tileset needs a unique firstgid
             if ( tile && tileid ) {
                 tileset.firstGID = parseInt(tileset.firstGID) + parseInt(tileid);
             }
 
+            if (useCache ) {
+                tileset.updateTextures();
+            }
             // update the textures once the base texture has loaded
             baseTexture.once('loaded', function () {
                 toLoad--;
                 tileset.updateTextures();
+
                 if (toLoad <= 0) {
                     next();
                 }
             });
 
             map.tilesets.push(tileset);
+
             return tileset;
          }
 

@@ -10,6 +10,7 @@ var Tile = function(gid, texture)
 
     // tiled always anchors sprites bottom left
     this.anchor.set(0,1);
+
 };
 
 Tile.prototype = Object.create(PIXI.Sprite.prototype);
