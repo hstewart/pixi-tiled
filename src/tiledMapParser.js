@@ -112,12 +112,12 @@ module.exports = function() {
                 return;
             }
 
-
+            var filename = src.split("/").pop();
             var baseTexture;
             var existingTexture;
 
-            if ( PIXI && PIXI.utils.TextureCache && typeof PIXI.utils.TextureCache[tile.image] != "undefined") {
-                existingTexture = PIXI.utils.TextureCache[tile.image];
+            if ( PIXI && PIXI.utils.TextureCache && typeof PIXI.utils.TextureCache[filename] != "undefined") {
+                existingTexture = PIXI.utils.TextureCache[filename];
                 baseTexture = PIXI.BaseTexture.fromImage( existingTexture.baseTexture.imageUrl );
                 useCache = true;
             } else {
